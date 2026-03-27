@@ -37,7 +37,7 @@ class CharacterQuest(models.Model):
     ]
     character = models.ForeignKey('characters.Character', on_delete=models.CASCADE)
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
-    session = models.ForeignKey('sessions.GameSession', on_delete=models.CASCADE)
+    session = models.ForeignKey('game_sessions.GameSession', on_delete=models.CASCADE)
     current_step = models.ForeignKey(
         QuestStep, on_delete=models.SET_NULL, null=True, blank=True,
     )

@@ -17,7 +17,7 @@ class Character(BaseModel):
     )
     color = models.CharField(max_length=7, default='#6366f1', verbose_name='Farbe (Hex)')
     current_session = models.ForeignKey(
-        'sessions.GameSession',
+        'game_sessions.GameSession',
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='active_characters',
