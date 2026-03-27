@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Karten-Sets – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Karten-Sets</h1>
+        <a href="{% url 'maps:mapset_create' %}" class="btn-primary btn-sm">+ Neues Set</a>
+    </div>
+
+    {% if mapsets %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for ms in mapsets %}
+        <div class="card hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="flex items-start justify-between mb-2">
+                    <h2 class="text-lg font-semibold">{{ ms.title }}</h2>
+                    <span class="{% if ms.map_type == 'image' %}badge-blue{% else %}badge-green{% endif %} badge shrink-0 ml-2">
+                        {{ ms.get_map_type_display }}
+                    </span>
+                </div>
+                {% if ms.description %}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{{ ms.description }}</p>
+                {% endif %}
+                <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">
+                    {{ ms.maps.count }} Karte{{ ms.maps.count|pluralize:"n" }}
+                    {% if request.user.is_admin and ms.owner != request.user %}
+                        &nbsp;·&nbsp; von {{ ms.owner.username }}
+                    {% endif %}
+                </p>
+                <div class="flex gap-2">
+                    <a href="{% url 'maps:mapset_detail' ms.pk %}" class="btn-primary btn-sm flex-1 text-center">Öffnen</a>
+                    <a href="{% url 'maps:mapset_edit' ms.pk %}" class="btn-secondary btn-sm">Bearbeiten</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <p class="text-gray-400 dark:text-gray-500 mb-4">Noch keine Karten-Sets vorhanden.</p>
+        <a href="{% url 'maps:mapset_create' %}" class="btn-primary">Erstes Set anlegen</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

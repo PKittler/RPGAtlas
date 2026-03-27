@@ -1,0 +1,11 @@
+{
+  "name": "rpgatlas-theme",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "tailwindcss -i ./src/styles.css -o ../static/css/dist/styles.css --watch",
+    "build": "tailwindcss -i ./src/styles.css -o ../static/css/dist/styles.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

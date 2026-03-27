@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}User-Verwaltung – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">User-Verwaltung</h1>
+        <a href="{% url 'accounts:admin_user_create' %}" class="btn-primary btn-sm">+ Neuer User</a>
+    </div>
+
+    {# Suche #}
+    <form method="get" class="flex gap-2 max-w-sm">
+        <input type="text" name="q" value="{{ query }}"
+               placeholder="Suche nach Name oder E-Mail…"
+               class="form-input">
+        <button type="submit" class="btn-secondary btn-sm shrink-0">Suchen</button>
+        {% if query %}
+            <a href="{% url 'accounts:admin_user_list' %}" class="btn-secondary btn-sm shrink-0">✕</a>
+        {% endif %}
+    </form>
+
+    <div class="card overflow-hidden">
+        <table class="table w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th>Benutzername</th>
+                    <th>E-Mail</th>
+                    <th>Rolle</th>
+                    <th>Status</th>
+                    <th>Mitglied seit</th>
+                    <th class="text-right">Aktionen</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                {% for u in users %}
+                <tr>
+                    <td class="font-medium">{{ u.username }}</td>
+                    <td class="text-gray-500 dark:text-gray-400">{{ u.email }}</td>
+                    <td>
+                        <span class="{% if u.role == 'admin' %}badge-red{% elif u.role == 'premium' %}badge-purple{% else %}badge-blue{% endif %} badge">
+                            {{ u.get_role_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if u.is_banned %}
+                            <span class="badge badge-red">Gesperrt</span>
+                        {% else %}
+                            <span class="badge badge-green">Aktiv</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-gray-500 dark:text-gray-400 text-xs">{{ u.created_at|date:"d.m.Y" }}</td>
+                    <td class="text-right">
+                        <a href="{% url 'accounts:admin_user_edit' u.pk %}"
+                           class="btn-secondary btn-sm mr-1">Bearbeiten</a>
+                        {% if u.pk != request.user.pk %}
+                        <a href="{% url 'accounts:admin_user_delete' u.pk %}"
+                           class="btn-danger btn-sm">Löschen</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-8 text-gray-400 dark:text-gray-500">
+                        Keine Benutzer gefunden.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

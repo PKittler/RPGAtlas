@@ -1,0 +1,58 @@
+{# HTMX-Partial: NPC-Popup-Modal #}
+{% with npc=element.npc %}
+<div>
+    {% if npc.image %}
+    <img src="{{ npc.image.url }}"
+         alt="NPC-Bild"
+         class="w-full rounded-lg mb-4 max-h-40 object-cover">
+    {% endif %}
+
+    <div class="text-gray-200 leading-relaxed mb-5 text-sm">
+        {{ npc.dialogue_text|linebreaksbr }}
+    </div>
+
+    {% if active_session and npc.button_type != 'none' %}
+    <div class="flex gap-2 flex-wrap">
+        {% if npc.button_type == 'accept_decline_later' %}
+        <button hx-post="{% url 'maps:element_action' element.pk %}"
+                hx-vals='{"action": "accept"}'
+                hx-trigger="click"
+                hx-swap="none"
+                class="btn-primary flex-1">
+            Quest annehmen
+        </button>
+        <button hx-post="{% url 'maps:element_action' element.pk %}"
+                hx-vals='{"action": "decline"}'
+                hx-trigger="click"
+                hx-swap="none"
+                class="btn-danger flex-1">
+            Ablehnen
+        </button>
+        <button id="btn-close-element-popup-modal" class="btn-secondary flex-1">
+            Später
+        </button>
+
+        {% elif npc.button_type == 'yes_no' %}
+        <button hx-post="{% url 'maps:element_action' element.pk %}"
+                hx-vals='{"action": "yes"}'
+                hx-trigger="click"
+                hx-swap="none"
+                class="btn-primary flex-1">
+            Ja
+        </button>
+        <button hx-post="{% url 'maps:element_action' element.pk %}"
+                hx-vals='{"action": "no"}'
+                hx-trigger="click"
+                hx-swap="none"
+                class="btn-secondary flex-1">
+            Nein
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if is_owner and element.is_conditional %}
+    <p class="text-xs text-amber-500 mt-3">Bedingt sichtbar (nur für dich als Eigentümer sichtbar)</p>
+    {% endif %}
+</div>
+{% endwith %}

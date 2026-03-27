@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ map.title }} – RPG Atlas{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Vollbild-Karte: main-Padding entfernen */
+  main { padding: 0 !important; max-width: 100% !important; overflow: hidden; }
+
+  #map-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 3.5rem); /* Viewport minus Header */
+  }
+  #map {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  #map-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  #map-toolbar > * { pointer-events: auto; }
+
+  .map-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .65);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .map-modal-box {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 420px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── JSON-Daten für JS ──────────────────────────────────────────────── #}
+{{ map_data_json|json_script:"map-data" }}
+{{ gates_json|json_script:"gates-data" }}
+{{ ads_json|json_script:"ads-data" }}
+{{ elements_json|json_script:"elements-data" }}
+
+{# ── Karten-Container ────────────────────────────────────────────────── #}
+<div id="map-container">
+    <div id="map"></div>
+
+    {# Toolbar #}
+    <div id="map-toolbar">
+        <a href="{% url 'maps:mapset_detail' mapset.pk %}"
+           class="btn-secondary btn-sm shadow-lg backdrop-blur-sm">
+            ← {{ mapset.title }}
+        </a>
+        {% if is_owner %}
+        <button id="btn-add-gate" class="btn-secondary btn-sm shadow-lg backdrop-blur-sm">
+            + Gate hinzufügen
+        </button>
+        <button id="btn-add-element" class="btn-secondary btn-sm shadow-lg backdrop-blur-sm">
+            + Element
+        </button>
+        {% endif %}
+    </div>
+
+    {# Info-Badge unten links #}
+    <div style="position:absolute;bottom:12px;left:12px;z-index:400;">
+        <span class="badge badge-blue shadow-lg text-xs px-3 py-1.5">
+            {{ map.title }}{% if map.is_main %} · Hauptkarte{% endif %}
+        </span>
+    </div>
+</div>
+
+{# ── Gate-Modal ───────────────────────────────────────────────────────── #}
+<div id="gate-modal" class="map-modal-backdrop" hidden>
+    <div class="map-modal-box">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Gate hinzufügen</h2>
+            <button id="btn-close-gate-modal"
+                    class="text-gray-400 hover:text-white transition-colors text-2xl leading-none"
+                    aria-label="Schließen">✕</button>
+        </div>
+        <div id="gate-modal-content"></div>
+    </div>
+</div>
+
+{# ── Ad-Modal ─────────────────────────────────────────────────────────── #}
+<div id="ad-modal" class="map-modal-backdrop" hidden>
+    <div class="map-modal-box">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Werbung</h2>
+            <button id="btn-close-ad-modal"
+                    class="text-gray-400 hover:text-white transition-colors text-2xl leading-none"
+                    aria-label="Schließen">✕</button>
+        </div>
+        <div id="ad-modal-content"></div>
+    </div>
+</div>
+
+{# ── Element-Add-Modal (Eigentümer) ───────────────────────────────────── #}
+<div id="element-add-modal" class="map-modal-backdrop" hidden>
+    <div class="map-modal-box">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Element hinzufügen</h2>
+            <button id="btn-close-element-add-modal"
+                    class="text-gray-400 hover:text-white transition-colors text-2xl leading-none"
+                    aria-label="Schließen">✕</button>
+        </div>
+        <div id="element-add-modal-content"></div>
+    </div>
+</div>
+
+{# ── Element-Popup-Modal (Spieler & Eigentümer) ───────────────────────── #}
+<div id="element-popup-modal" class="map-modal-backdrop" hidden>
+    <div class="map-modal-box">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white" id="element-popup-title">Element</h2>
+            <button id="btn-close-element-popup-modal"
+                    class="text-gray-400 hover:text-white transition-colors text-2xl leading-none"
+                    aria-label="Schließen">✕</button>
+        </div>
+        <div id="element-popup-modal-content"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+{# Globale JS-Variablen #}
+<script>
+  window.GATE_FORM_URL    = "{% url 'maps:gate_form' map.pk %}";
+  window.GATE_ADD_URL     = "{% url 'maps:gate_add' map.pk %}";
+  window.ELEMENT_FORM_URL = "{% url 'maps:element_type_select' map.pk %}";
+  window.ELEMENT_ADD_URL  = "{% url 'maps:element_add' map.pk %}";
+  window.IS_OWNER         = {{ is_owner|yesno:"true,false" }};
+  window.CSRF_TOKEN       = "{{ csrf_token }}";
+</script>
+
+{# Leaflet JS #}
+<script src="{% static 'vendor/js/leaflet.js' %}"></script>
+{# Leaflet-Bild-Pfad (marker-icon.png usw.) #}
+<script>L.Icon.Default.imagePath = "{% static 'vendor/leaflet/images/' %}";</script>
+
+{# Gate-Icons und Karten-Logik #}
+<script src="{% static 'js/gate_icons.js' %}"></script>
+<script src="{% static 'js/map_view.js' %}"></script>
+{# Element-Icons und Element-Logik #}
+<script src="{% static 'js/element_icons.js' %}"></script>
+<script src="{% static 'js/map_elements.js' %}"></script>
+{% endblock %}

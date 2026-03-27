@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">Profil</h1>
+        <a href="{% url 'accounts:profile_edit' %}" class="btn-secondary btn-sm">Bearbeiten</a>
+    </div>
+
+    <div class="card card-body space-y-4">
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Benutzername</span>
+            <span class="font-medium">{{ user.username }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">E-Mail</span>
+            <span class="font-medium">{{ user.email }}</span>
+        </div>
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Rolle</span>
+            <span class="
+                {% if user.role == 'admin' %}badge-red
+                {% elif user.role == 'premium' %}badge-purple
+                {% else %}badge-blue{% endif %} badge">
+                {{ user.get_role_display }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Mitglied seit</span>
+            <span class="font-medium">{{ user.created_at|date:"d.m.Y" }}</span>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <a href="{% url 'accounts:delete_account' %}"
+           class="text-sm text-red-600 dark:text-red-400 hover:underline">
+            Account löschen
+        </a>
+    </div>
+</div>
+{% endblock %}

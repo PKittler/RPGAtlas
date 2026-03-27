@@ -1,0 +1,50 @@
+{# HTMX-Partial: Trigger-Formular #}
+<form hx-post="{% url 'maps:element_add' map.pk %}"
+      hx-target="#element-add-modal-content"
+      hx-swap="innerHTML"
+      novalidate
+      x-data="{ isConditional: false }">
+    {% csrf_token %}
+    <input type="hidden" name="element_type" value="trigger">
+    <input type="hidden" name="x_pos" value="{{ x_pos }}">
+    <input type="hidden" name="y_pos" value="{{ y_pos }}">
+
+    <div class="mb-4">
+        <label class="form-label">Beschreibung</label>
+        <textarea name="description_text" rows="4"
+                  class="form-input"
+                  placeholder="Was passiert, wenn dieser Trigger aktiviert wird?">{{ form.description_text.value|default:'' }}</textarea>
+        {% for e in form.description_text.errors %}
+            <p class="form-error">{{ e }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="mb-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="is_conditional" class="form-checkbox"
+                   @change="isConditional = $event.target.checked">
+            <span class="text-sm text-gray-300">Bedingt sichtbar (nur bei erfüllten Bedingungen)</span>
+        </label>
+
+        <div x-show="isConditional" x-cloak class="mt-3 pl-2 border-l-2 border-gray-600">
+            {% if quests %}
+            <p class="text-xs text-gray-400 mb-2">Sichtbar, wenn folgende Quests abgeschlossen sind:</p>
+            <div class="space-y-1 max-h-36 overflow-y-auto">
+                {% for quest in quests %}
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="condition_quest" value="{{ quest.pk }}" class="form-checkbox">
+                    <span class="text-sm text-gray-300">{{ quest.title }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-gray-500">Keine Quests in diesem Karten-Set vorhanden.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="flex gap-3">
+        <button type="submit" class="btn-primary flex-1">Trigger setzen</button>
+    </div>
+    <p class="text-xs text-gray-500 mt-3">Position: x={{ x_pos|floatformat:4 }}, y={{ y_pos|floatformat:4 }}</p>
+</form>

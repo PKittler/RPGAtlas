@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}RPG Atlas – Startseite{% endblock %}
+
+{% block content %}
+<div class="text-center py-16">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        Willkommen bei RPG Atlas
+    </h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
+        Erstelle Fantasy-Karten, platziere Gates und leite Spiel-Sessions in Echtzeit.
+    </p>
+    <a href="{% url 'maps:mapset_list' %}" class="btn-primary">
+        Meine Karten-Sets
+    </a>
+</div>
+{% endblock %}

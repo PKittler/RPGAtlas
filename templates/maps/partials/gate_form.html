@@ -1,0 +1,60 @@
+{# HTMX-Partial: Gate-Formular (wird in #gate-modal-content geladen) #}
+<form hx-post="{% url 'maps:gate_add' map.pk %}"
+      hx-target="#gate-modal-content"
+      hx-swap="innerHTML"
+      novalidate>
+    {% csrf_token %}
+
+    {# Koordinaten als Hidden-Felder #}
+    <input type="hidden" name="x_pos" value="{{ x_pos }}">
+    <input type="hidden" name="y_pos" value="{{ y_pos }}">
+
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-300 mb-1">Icon-Typ</label>
+        <select name="icon_type"
+                class="block w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white
+                       focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+            {% for value, label in form.icon_type.field.choices %}
+                <option value="{{ value }}" {% if form.icon_type.value == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        {% for e in form.icon_type.errors %}
+            <p class="text-xs text-red-400 mt-1">{{ e }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-300 mb-1">Beschriftung</label>
+        <input type="text" name="label"
+               value="{{ form.label.value|default:'' }}"
+               class="block w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white
+                      placeholder-gray-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+               placeholder="z.B. Stadttor, Höhle des Drachen …"
+               autofocus>
+        {% for e in form.label.errors %}
+            <p class="text-xs text-red-400 mt-1">{{ e }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-300 mb-1">Ziel-Karte (optional)</label>
+        <select name="target_map"
+                class="block w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white
+                       focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+            <option value="">— keine Zielkarte —</option>
+            {% for m in form.target_map.field.queryset %}
+                <option value="{{ m.pk }}" {% if form.target_map.value == m.pk %}selected{% endif %}>
+                    {{ m.title }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="flex gap-3">
+        <button type="submit" class="btn-primary flex-1">Gate setzen</button>
+    </div>
+
+    <p class="text-xs text-gray-500 mt-3">Position: x={{ x_pos|floatformat:4 }}, y={{ y_pos|floatformat:4 }}</p>
+</form>

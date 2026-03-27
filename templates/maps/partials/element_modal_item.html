@@ -1,0 +1,33 @@
+{# HTMX-Partial: Item-Popup-Modal #}
+{% with item=element.item %}
+<div>
+    {% if item.image %}
+    <img src="{{ item.image.url }}"
+         alt="Item-Bild"
+         class="w-full rounded-lg mb-4 max-h-40 object-cover">
+    {% endif %}
+
+    <div class="text-gray-200 leading-relaxed mb-5 text-sm">
+        {{ item.description_text|linebreaksbr }}
+    </div>
+
+    {% if active_session %}
+    <div class="flex gap-2 flex-wrap">
+        <button hx-post="{% url 'maps:element_action' element.pk %}"
+                hx-vals='{"action": "take"}'
+                hx-trigger="click"
+                hx-swap="none"
+                class="btn-primary flex-1">
+            Nehmen
+        </button>
+        <button id="btn-close-element-popup-modal" class="btn-secondary flex-1">
+            Liegen lassen
+        </button>
+    </div>
+    {% endif %}
+
+    {% if is_owner and element.is_conditional %}
+    <p class="text-xs text-amber-500 mt-3">Bedingt sichtbar (nur für dich als Eigentümer sichtbar)</p>
+    {% endif %}
+</div>
+{% endwith %}

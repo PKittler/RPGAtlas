@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Datenschutzerklärung – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+    <h1 class="text-3xl font-bold mb-8">Datenschutzerklärung</h1>
+
+    {# TODO: Vollständige Datenschutzerklärung gemäß DSGVO einfügen #}
+    {# TODO: Anbieter-Kontaktdaten ergänzen #}
+    {# TODO: Datenschutzbeauftragter (falls erforderlich) ergänzen #}
+
+    <div class="prose dark:prose-invert space-y-6 text-gray-700 dark:text-gray-300">
+        <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">1. Verantwortliche Stelle</h2>
+            <p class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm">
+                <strong>TODO:</strong> Name, Adresse und Kontaktdaten des Verantwortlichen einfügen.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">2. Erhobene Daten</h2>
+            <p>Bei der Registrierung werden folgende personenbezogene Daten erhoben:</p>
+            <ul class="list-disc list-inside mt-2 space-y-1">
+                <li>E-Mail-Adresse</li>
+                <li>Benutzername</li>
+                <li>Passwort (gehasht gespeichert)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">3. Zweck der Verarbeitung</h2>
+            <p>Die erhobenen Daten werden ausschließlich zur Bereitstellung der RPG-Atlas-Dienste verwendet.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">4. Löschung von Daten</h2>
+            <p>
+                Du kannst deinen Account jederzeit löschen. Dabei werden alle personenbezogenen Daten
+                anonymisiert (Benutzername, E-Mail). Die Löschung kann unter
+                <a href="{% url 'accounts:delete_account' %}" class="text-primary-600 dark:text-primary-400 hover:underline">Profil → Account löschen</a>
+                vorgenommen werden.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">5. Cookies</h2>
+            <p>
+                RPG Atlas verwendet Session-Cookies, die für den Betrieb der Anwendung technisch notwendig sind.
+                Es werden keine Tracking-Cookies oder Cookies von Drittanbietern eingesetzt.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">6. Deine Rechte</h2>
+            <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung deiner Daten.</p>
+            <p class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm mt-3">
+                <strong>TODO:</strong> Kontaktadresse für Datenschutzanfragen ergänzen.
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

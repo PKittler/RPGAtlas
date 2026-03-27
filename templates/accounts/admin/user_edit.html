@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}User bearbeiten – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'accounts:admin_user_list' %}"
+           class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">← Zurück</a>
+        <h1 class="text-2xl font-bold">User bearbeiten</h1>
+    </div>
+
+    <div class="card card-body">
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            ID: {{ target_user.pk }} &nbsp;·&nbsp; Mitglied seit {{ target_user.created_at|date:"d.m.Y" }}
+        </p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-4">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox"
+                               name="{{ field.html_name }}"
+                               id="{{ field.id_for_label }}"
+                               {% if field.value %}checked{% endif %}
+                               class="form-checkbox">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</span>
+                    </label>
+                {% elif field.field.widget.input_type == 'select' %}
+                    <select name="{{ field.html_name }}"
+                            id="{{ field.id_for_label }}"
+                            class="form-input">
+                        {% for val, label in field.field.choices %}
+                            <option value="{{ val }}" {% if field.value == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input type="{{ field.field.widget.input_type|default:'text' }}"
+                           name="{{ field.html_name }}"
+                           id="{{ field.id_for_label }}"
+                           value="{{ field.value|default:'' }}"
+                           class="form-input {% if field.errors %}border-red-500{% endif %}">
+                {% endif %}
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="btn-primary">Speichern</button>
+                <a href="{% url 'accounts:admin_user_list' %}" class="btn-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

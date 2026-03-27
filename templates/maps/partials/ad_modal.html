@@ -1,0 +1,30 @@
+{# HTMX-Partial: Werbe-Icon-Modal #}
+<div>
+    <p class="text-white mb-4 leading-relaxed">{{ ad.ad_text }}</p>
+
+    {% if ad.coupon_code %}
+    <div class="bg-gray-700 rounded-md px-4 py-3 mb-4 flex items-center justify-between">
+        <span class="text-xs text-gray-400 uppercase tracking-wider">Gutschein</span>
+        <span class="font-mono font-bold text-yellow-400 text-sm">{{ ad.coupon_code }}</span>
+    </div>
+    {% endif %}
+
+    {% if ad.link_url %}
+    <a href="{{ ad.link_url }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       hx-post="{% url 'maps:ad_click' ad.pk %}"
+       hx-trigger="click"
+       hx-swap="none"
+       class="btn-primary w-full text-center mb-3">
+        {{ ad.link_label|default:"Mehr erfahren" }} ↗
+    </a>
+    {% endif %}
+
+    {# Click zählen (auch ohne Link) #}
+    <div hx-post="{% url 'maps:ad_click' ad.pk %}"
+         hx-trigger="load"
+         hx-swap="none"
+         style="display:none;">
+    </div>
+</div>

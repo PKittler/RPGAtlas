@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Karte hinzufügen – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'maps:mapset_detail' mapset.pk %}"
+           class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">← Zurück</a>
+        <h1 class="text-2xl font-bold">Karte hinzufügen</h1>
+    </div>
+
+    <div class="card card-body">
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Karten-Typ: <strong>{{ mapset.get_map_type_display }}</strong>
+        </p>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Titel</label>
+                <input type="text" name="{{ form.title.html_name }}" id="{{ form.title.id_for_label }}"
+                       value="{{ form.title.value|default:'' }}"
+                       class="form-input {% if form.title.errors %}border-red-500{% endif %}" autofocus>
+                {% for e in form.title.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+            </div>
+
+            {% if mapset.map_type == 'image' %}
+            <div class="mb-4">
+                <label for="{{ form.image.id_for_label }}" class="form-label">
+                    Kartenbild <span class="text-xs text-gray-400 font-normal">(PNG/JPG, max. 50 MB)</span>
+                </label>
+                <input type="file" name="{{ form.image.html_name }}" id="{{ form.image.id_for_label }}"
+                       accept="image/png,image/jpeg"
+                       class="block w-full text-sm text-gray-600 dark:text-gray-400
+                              file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0
+                              file:text-sm file:bg-primary-50 file:text-primary-700
+                              dark:file:bg-primary-900/30 dark:file:text-primary-300
+                              hover:file:bg-primary-100 dark:hover:file:bg-primary-900/50">
+                {% for e in form.image.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+            </div>
+            {% else %}
+            <div class="mb-4">
+                <label for="{{ form.tiles_file.id_for_label }}" class="form-label">
+                    MBTiles-Datei <span class="text-xs text-gray-400 font-normal">(max. 500 MB)</span>
+                </label>
+                <input type="file" name="{{ form.tiles_file.html_name }}" id="{{ form.tiles_file.id_for_label }}"
+                       accept=".mbtiles"
+                       class="block w-full text-sm text-gray-600 dark:text-gray-400
+                              file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0
+                              file:text-sm file:bg-primary-50 file:text-primary-700
+                              dark:file:bg-primary-900/30 dark:file:text-primary-300
+                              hover:file:bg-primary-100 dark:hover:file:bg-primary-900/50">
+                {% for e in form.tiles_file.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="{{ form.is_main.html_name }}"
+                           {% if form.is_main.value %}checked{% endif %}
+                           class="form-checkbox">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        Als Hauptkarte des Sets festlegen
+                    </span>
+                </label>
+            </div>
+
+            <details class="mb-6">
+                <summary class="cursor-pointer text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                    Erweiterte Einstellungen (optional)
+                </summary>
+                <div class="mt-3 space-y-3 pl-2">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="form-label">Zoom min</label>
+                            <input type="number" name="{{ form.zoom_min.html_name }}"
+                                   value="{{ form.zoom_min.value|default:'1' }}"
+                                   class="form-input" min="-10" max="20">
+                        </div>
+                        <div>
+                            <label class="form-label">Zoom max</label>
+                            <input type="number" name="{{ form.zoom_max.html_name }}"
+                                   value="{{ form.zoom_max.value|default:'10' }}"
+                                   class="form-input" min="-10" max="20">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="form-label">Zentrum X (0.0–1.0)</label>
+                            <input type="number" name="{{ form.center_x.html_name }}"
+                                   value="{{ form.center_x.value|default:'0.5' }}"
+                                   class="form-input" step="0.01" min="0" max="1">
+                        </div>
+                        <div>
+                            <label class="form-label">Zentrum Y (0.0–1.0)</label>
+                            <input type="number" name="{{ form.center_y.html_name }}"
+                                   value="{{ form.center_y.value|default:'0.5' }}"
+                                   class="form-input" step="0.01" min="0" max="1">
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <div class="flex gap-3">
+                <button type="submit" class="btn-primary">Karte hochladen</button>
+                <a href="{% url 'maps:mapset_detail' mapset.pk %}" class="btn-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

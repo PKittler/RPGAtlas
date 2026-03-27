@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Login – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto">
+    <div class="card card-body">
+        <h1 class="text-2xl font-bold text-center mb-6">Anmelden</h1>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                <input type="email"
+                       name="{{ form.email.html_name }}"
+                       id="{{ form.email.id_for_label }}"
+                       value="{{ form.email.value|default:'' }}"
+                       class="form-input {% if form.email.errors %}border-red-500{% endif %}"
+                       autocomplete="email"
+                       autofocus>
+                {% for error in form.email.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="mb-6">
+                <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                <input type="password"
+                       name="{{ form.password.html_name }}"
+                       id="{{ form.password.id_for_label }}"
+                       class="form-input {% if form.password.errors %}border-red-500{% endif %}"
+                       autocomplete="current-password">
+                {% for error in form.password.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-primary w-full">Anmelden</button>
+        </form>
+
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+            Noch kein Account?
+            <a href="{% url 'accounts:register' %}" class="text-primary-600 dark:text-primary-400 hover:underline">
+                Jetzt registrieren
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

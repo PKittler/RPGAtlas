@@ -1,0 +1,33 @@
+{# HTMX-Partial: Element-Typ auswählen (Schritt 1) #}
+<div>
+    <p class="text-xs text-gray-500 mb-4">
+        Position: x={{ x_pos|floatformat:4 }}, y={{ y_pos|floatformat:4 }}
+    </p>
+    <p class="text-sm text-gray-300 mb-4">Welcher Element-Typ soll platziert werden?</p>
+
+    <div class="space-y-3">
+        <button hx-get="{% url 'maps:element_form' map.pk 'npc' %}?x={{ x_pos }}&y={{ y_pos }}"
+                hx-target="#element-add-modal-content"
+                hx-swap="innerHTML"
+                class="btn-secondary w-full text-left px-4 py-3">
+            <span class="font-medium text-blue-400">NPC</span>
+            <span class="text-xs text-gray-400 block mt-0.5">Charakter mit Dialog und Aktions-Buttons</span>
+        </button>
+
+        <button hx-get="{% url 'maps:element_form' map.pk 'item' %}?x={{ x_pos }}&y={{ y_pos }}"
+                hx-target="#element-add-modal-content"
+                hx-swap="innerHTML"
+                class="btn-secondary w-full text-left px-4 py-3">
+            <span class="font-medium text-yellow-400">Item</span>
+            <span class="text-xs text-gray-400 block mt-0.5">Gegenstand, der aufgenommen werden kann</span>
+        </button>
+
+        <button hx-get="{% url 'maps:element_form' map.pk 'trigger' %}?x={{ x_pos }}&y={{ y_pos }}"
+                hx-target="#element-add-modal-content"
+                hx-swap="innerHTML"
+                class="btn-secondary w-full text-left px-4 py-3">
+            <span class="font-medium text-orange-400">Trigger</span>
+            <span class="text-xs text-gray-400 block mt-0.5">Auslöser für Ereignisse (Falle, Schalter …)</span>
+        </button>
+    </div>
+</div>
