@@ -421,8 +421,11 @@ def element_form(request, map_pk, element_type):
     x_pos = request.GET.get('x', '0.5')
     y_pos = request.GET.get('y', '0.5')
     form_classes = {'npc': NPCForm, 'item': ItemForm, 'trigger': TriggerForm}
-    form = form_classes[element_type]()
     quests = map_obj.map_set.quests.all()
+    if element_type == 'npc':
+        form = NPCForm(map_set=map_obj.map_set)
+    else:
+        form = form_classes[element_type]()
 
     return render(request, f'maps/partials/element_form_{element_type}.html', {
         'form': form,
@@ -448,7 +451,10 @@ def element_add(request, map_pk):
         from django.http import HttpResponse
         return HttpResponse(status=400)
 
-    form = FormClass(request.POST, request.FILES)
+    if element_type == 'npc':
+        form = NPCForm(map_obj.map_set, request.POST, request.FILES)
+    else:
+        form = FormClass(request.POST, request.FILES)
     x_pos = request.POST.get('x_pos', '0.5')
     y_pos = request.POST.get('y_pos', '0.5')
 
@@ -579,6 +585,21 @@ def element_action(request, element_pk):
             map_element=element,
             session=active_session,
         )
+
+    if action == 'accept':
+        try:
+            from quests.models import CharacterQuest
+            npc = element.npc
+            if npc.quest:
+                first_step = npc.quest.steps.order_by('order').first()
+                CharacterQuest.objects.get_or_create(
+                    character=participant.character,
+                    quest=npc.quest,
+                    session=active_session,
+                    defaults={'status': 'active', 'current_step': first_step},
+                )
+        except Exception:
+            pass
 
     from django.http import HttpResponse
     response = HttpResponse(status=200)

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+  /* Hauptcontainer aus base.html zurücksetzen */
+  body > main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  #adminpanel-layout {
+    display: flex;
+    min-height: calc(100vh - 3.5rem);
+  }
+  #adminpanel-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #111827;
+    border-right: 1px solid #1f2937;
+    padding: 1.25rem 0;
+    position: sticky;
+    top: 3.5rem;
+    height: calc(100vh - 3.5rem);
+    overflow-y: auto;
+  }
+  #adminpanel-main {
+    flex: 1;
+    min-width: 0;
+    padding: 2rem;
+    max-width: 1200px;
+  }
+  .ap-nav-section {
+    padding: 0.25rem 1rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4b5563;
+  }
+  .ap-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1.25rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    border-radius: 0;
+  }
+  .ap-nav-link:hover {
+    background: #1f2937;
+    color: #e5e7eb;
+  }
+  .ap-nav-link.active {
+    background: #1e3a5f;
+    color: #60a5fa;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="adminpanel-layout">
+
+    {# ── Sidebar ─────────────────────────────────────────────────────── #}
+    <nav id="adminpanel-sidebar">
+        <div class="px-4 pb-4 mb-2 border-b border-gray-800">
+            <span class="text-xs font-bold text-yellow-400 uppercase tracking-widest">Admin-Panel</span>
+        </div>
+
+        <p class="ap-nav-section">Übersicht</p>
+        <a href="{% url 'adminpanel:dashboard' %}"
+           class="ap-nav-link {% block nav_dashboard %}{% endblock %}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+        </a>
+
+        <p class="ap-nav-section mt-3">Nutzer</p>
+        <a href="{% url 'adminpanel:user_list' %}"
+           class="ap-nav-link {% block nav_users %}{% endblock %}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Benutzer
+        </a>
+
+        <p class="ap-nav-section mt-3">Karten</p>
+        <a href="{% url 'adminpanel:mapset_list' %}"
+           class="ap-nav-link {% block nav_mapsets %}{% endblock %}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+            Karten-Sets
+        </a>
+
+        <p class="ap-nav-section mt-3">Werbung</p>
+        <a href="{% url 'adminpanel:advertising:partner_list' %}"
+           class="ap-nav-link {% block nav_partners %}{% endblock %}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            Werbepartner
+        </a>
+        <a href="{% url 'adminpanel:advertising:campaign_list' %}"
+           class="ap-nav-link {% block nav_campaigns %}{% endblock %}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+            Kampagnen
+        </a>
+        <a href="{% url 'adminpanel:advertising:icon_list' %}"
+           class="ap-nav-link {% block nav_icons %}{% endblock %}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Werbe-Icons
+        </a>
+    </nav>
+
+    {# ── Hauptinhalt ─────────────────────────────────────────────────── #}
+    <main id="adminpanel-main">
+        {% block adminpanel_content %}{% endblock %}
+    </main>
+
+</div>
+{% endblock %}

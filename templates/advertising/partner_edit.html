@@ -1,0 +1,45 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}{{ partner.name }} bearbeiten – Admin-Panel{% endblock %}
+{% block nav_partners %}active{% endblock %}
+
+{% block adminpanel_content %}
+<div class="max-w-lg space-y-6">
+
+    <div>
+        <a href="{% url 'adminpanel:advertising:partner_list' %}"
+           class="text-sm text-gray-500 hover:text-gray-300 transition-colors">← Werbepartner</a>
+        <h1 class="text-2xl font-bold mt-2">{{ partner.name }} bearbeiten</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.name.label }}</label>
+                    <input type="text" name="name" value="{{ form.name.value|default:'' }}"
+                           class="form-input">
+                    {% for e in form.name.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-6">
+                    <label class="form-label">{{ form.contact_email.label }}</label>
+                    <input type="email" name="contact_email"
+                           value="{{ form.contact_email.value|default:'' }}"
+                           class="form-input">
+                    {% for e in form.contact_email.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1">Speichern</button>
+                    <a href="{% url 'adminpanel:advertising:partner_list' %}" class="btn-secondary">Abbrechen</a>
+                    <a href="{% url 'adminpanel:advertising:partner_delete' partner.pk %}"
+                       class="btn-danger btn-sm">Löschen</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

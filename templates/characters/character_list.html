@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Meine Figuren – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">Meine Figuren</h1>
+        <a href="{% url 'characters:character_create' %}" class="btn-primary btn-sm">+ Neue Figur</a>
+    </div>
+
+    {% if characters %}
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for char in characters %}
+        <div class="card">
+            <div class="card-body flex items-start gap-4">
+                {% if char.avatar_image %}
+                <img src="{{ char.avatar_image.url }}"
+                     alt="{{ char.name }}"
+                     class="w-14 h-14 rounded-full object-cover shrink-0">
+                {% else %}
+                <div class="w-14 h-14 rounded-full shrink-0 flex items-center justify-center text-xl font-bold text-white"
+                     style="background-color: {{ char.color }};">
+                    {{ char.name|first|upper }}
+                </div>
+                {% endif %}
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full shrink-0"
+                              style="background-color: {{ char.color }};"></span>
+                        <h2 class="font-semibold truncate">{{ char.name }}</h2>
+                    </div>
+                    {% if char.description %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ char.description }}</p>
+                    {% endif %}
+                    {% if char.current_session %}
+                    <span class="badge badge-blue text-xs mt-2">In Session: {{ char.current_session.title }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="px-4 pb-4 flex gap-2">
+                <a href="{% url 'characters:character_detail' char.pk %}"
+                   class="btn-secondary btn-sm flex-1 text-center">Profil</a>
+                {% if not char.current_session %}
+                <a href="{% url 'characters:character_edit' char.pk %}"
+                   class="btn-secondary btn-sm">Bearbeiten</a>
+                <a href="{% url 'characters:character_delete' char.pk %}"
+                   class="btn-danger btn-sm">Löschen</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card text-center py-12">
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Noch keine Figuren angelegt.</p>
+        <a href="{% url 'characters:character_create' %}" class="btn-primary">Erste Figur erstellen</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

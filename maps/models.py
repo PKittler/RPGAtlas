@@ -177,6 +177,10 @@ class NPC(models.Model):
     button_type = models.CharField(
         max_length=30, choices=BUTTON_CHOICES, default='none', verbose_name='Button-Typ',
     )
+    quest = models.ForeignKey(
+        'quests.Quest', on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Quest bei Annahme (optional)',
+    )
 
 
 class Item(models.Model):

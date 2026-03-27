@@ -1,0 +1,61 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Benutzer erstellen – Admin-Panel{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block adminpanel_content %}
+<div class="max-w-lg space-y-6">
+
+    <div>
+        <a href="{% url 'adminpanel:user_list' %}"
+           class="text-sm text-gray-500 hover:text-gray-300 transition-colors">← Benutzer</a>
+        <h1 class="text-2xl font-bold mt-2">Benutzer erstellen</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.email.label }}</label>
+                    <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                           class="form-input" autocomplete="off">
+                    {% for e in form.email.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.username.label }}</label>
+                    <input type="text" name="username" value="{{ form.username.value|default:'' }}"
+                           class="form-input" autocomplete="off">
+                    {% for e in form.username.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.role.label }}</label>
+                    <select name="role" class="form-input">
+                        {% for val, label in form.role.field.choices %}
+                        <option value="{{ val }}"
+                                {% if form.role.value == val %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% for e in form.role.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-6">
+                    <label class="form-label">{{ form.password.label }}</label>
+                    <input type="password" name="password" class="form-input" autocomplete="new-password">
+                    {% for e in form.password.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1">Benutzer erstellen</button>
+                    <a href="{% url 'adminpanel:user_list' %}" class="btn-secondary">Abbrechen</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

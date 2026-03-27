@@ -1,0 +1,8 @@
+{# HTMX-Partial: Quest-Zuweisung Erfolgsmeldung #}
+<div class="p-3 rounded-lg border border-green-700 bg-green-900/30 text-xs text-green-300">
+    {% if assigned > 0 %}
+        Quest „{{ quest.title }}" wurde {{ assigned }} Figur{{ assigned|pluralize:"en" }} zugewiesen.
+    {% else %}
+        Quest war bereits allen ausgewählten Figuren zugewiesen.
+    {% endif %}
+</div>

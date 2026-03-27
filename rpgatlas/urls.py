@@ -10,6 +10,11 @@ urlpatterns = [
     path('', views.home_view, name='home'),
     path('accounts/', include('accounts.urls')),
     path('maps/', include('maps.urls')),
+    path('characters/', include('characters.urls')),
+    path('sessions/', include('sessions.urls')),
+    path('quests/', include('quests.urls')),
+    path('inventory/', include('inventory.urls')),
+    path('admin-panel/', include('adminpanel.urls')),
     path('datenschutz/', views.datenschutz_view, name='datenschutz'),
     path('impressum/', views.impressum_view, name='impressum'),
 ]

@@ -49,6 +49,22 @@
         {% endfor %}
     </div>
 
+    <div class="mb-4">
+        <label class="form-label">Quest bei Annahme (optional)</label>
+        <select name="quest" class="form-input">
+            <option value="">— Keine Quest —</option>
+            {% for q in form.quest.field.queryset %}
+            <option value="{{ q.pk }}"
+                    {% if form.quest.value|stringformat:"s" == q.pk|stringformat:"s" %}selected{% endif %}>
+                {{ q.title }}
+            </option>
+            {% endfor %}
+        </select>
+        {% for e in form.quest.errors %}
+            <p class="form-error">{{ e }}</p>
+        {% endfor %}
+    </div>
+
     <div class="mb-6">
         <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="is_conditional" class="form-checkbox"

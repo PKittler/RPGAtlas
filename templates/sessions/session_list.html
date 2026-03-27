@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Sessions – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">Spiel-Sessions</h1>
+        <a href="{% url 'game_sessions:session_create' %}" class="btn-primary btn-sm">+ Session erstellen</a>
+    </div>
+
+    {% if participated %}
+    <div class="space-y-3">
+        {% for sp in participated %}
+        {% with s=sp.session %}
+        <div class="card">
+            <div class="card-body flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-semibold text-lg">{{ s.title }}</h2>
+                    <div class="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <span>
+                            {% if s.status == 'waiting' %}Wartet
+                            {% elif s.status == 'running' %}Läuft
+                            {% else %}Beendet{% endif %}
+                        </span>
+                        <span>&middot; {{ s.initiator.username }}</span>
+                        <span>&middot; Rolle: {{ sp.get_role_display }}</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    {% if s.status == 'waiting' %}
+                    <a href="{% url 'game_sessions:session_lobby' s.pk %}"
+                       class="btn-secondary btn-sm">Lobby</a>
+                    {% elif s.status == 'running' %}
+                    <a href="{% url 'game_sessions:session_view' s.pk %}"
+                       class="btn-primary btn-sm">Beitreten</a>
+                    {% else %}
+                    <span class="text-xs text-gray-500 self-center">Beendet</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card text-center py-12">
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Keine Sessions vorhanden.</p>
+        <a href="{% url 'game_sessions:session_create' %}" class="btn-primary">Erste Session erstellen</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

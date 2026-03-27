@@ -1,0 +1,60 @@
+{# HTMX-Partial: Teilnehmerliste in der Lobby #}
+<div class="card">
+    <div class="card-body">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+            Teilnehmer ({{ participants|length }})
+        </h2>
+
+        {% if participants %}
+        <div class="space-y-3">
+            {% for p in participants %}
+            <div class="flex items-center justify-between gap-3 py-2 border-b border-gray-700 last:border-0">
+                <div class="flex items-center gap-3">
+                    {% if p.character.avatar_image %}
+                    <img src="{{ p.character.avatar_image.url }}"
+                         class="w-9 h-9 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                         style="background-color: {{ p.character.color }};">
+                        {{ p.character.name|first|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p class="font-medium text-sm">{{ p.character.name }}</p>
+                        <p class="text-xs text-gray-500">{{ p.user.username }} &middot; {{ p.get_role_display }}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    {% if p.is_confirmed %}
+                    <span class="badge badge-green text-xs">Bestätigt</span>
+                    {% else %}
+                    <span class="badge badge-blue text-xs">Ausstehend</span>
+                    {% endif %}
+
+                    {% if is_gamemaster and not p.is_confirmed %}
+                    <form method="post" action="{% url 'game_sessions:participant_confirm' p.pk %}"
+                          class="flex items-center gap-1">
+                        {% csrf_token %}
+                        <select name="role" class="text-xs bg-gray-700 border border-gray-600 rounded px-1 py-1 text-white">
+                            {% for value, label in p.ROLE_CHOICES %}
+                            <option value="{{ value }}"
+                                {% if p.role == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-primary btn-sm text-xs">OK</button>
+                    </form>
+                    <form method="post" action="{% url 'game_sessions:participant_reject' p.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger btn-sm text-xs">Ablehnen</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-sm">Noch keine Teilnehmer.</p>
+        {% endif %}
+    </div>
+</div>

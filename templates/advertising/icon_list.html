@@ -1,0 +1,106 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Werbe-Icons – Admin-Panel{% endblock %}
+{% block nav_icons %}active{% endblock %}
+
+{% block adminpanel_content %}
+<div class="space-y-6">
+
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Werbe-Icons</h1>
+            <p class="text-sm text-gray-400 mt-1">{{ icons.count }} Icon{{ icons.count|pluralize:"s" }}</p>
+        </div>
+        <a href="{% url 'adminpanel:advertising:icon_create' %}" class="btn-primary btn-sm shrink-0">
+            + Icon setzen
+        </a>
+    </div>
+
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-700 bg-gray-800/50 text-left">
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Kampagne</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Karte</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Position</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Klicks</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide w-36">Fortschritt</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% for icon in icons %}
+                    <tr class="hover:bg-gray-800/30 transition-colors">
+                        <td class="px-4 py-3 text-white">
+                            <p class="font-medium">{{ icon.campaign.title }}</p>
+                            <p class="text-xs text-gray-500">{{ icon.campaign.partner.name }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-gray-300">
+                            <p>{{ icon.map.title }}</p>
+                            <p class="text-xs text-gray-500">{{ icon.map.map_set.title }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-gray-400 text-xs font-mono">
+                            x={{ icon.x_pos|floatformat:3 }}<br>y={{ icon.y_pos|floatformat:3 }}
+                        </td>
+                        <td class="px-4 py-3 text-gray-300 text-xs">
+                            {{ icon.click_count }}
+                            {% if icon.max_clicks %}/ {{ icon.max_clicks }}{% else %}/ ∞{% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if icon.max_clicks %}
+                            {% widthratio icon.click_count icon.max_clicks 100 as pct %}
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="h-2 rounded-full transition-all
+                                    {% if pct|add:0 >= 90 %}bg-red-500
+                                    {% elif pct|add:0 >= 60 %}bg-yellow-500
+                                    {% else %}bg-green-500{% endif %}"
+                                     style="width: {{ pct }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ pct }}%</p>
+                            {% else %}
+                            <span class="text-xs text-gray-500">Unbegrenzt</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if icon.is_visible %}
+                            <span class="badge badge-green">Sichtbar</span>
+                            {% elif not icon.is_active %}
+                            <span class="badge" style="background:#374151;color:#9ca3af;">Inaktiv</span>
+                            {% else %}
+                            <span class="badge badge-yellow">Unsichtbar</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-1 flex-wrap">
+                                <a href="{% url 'adminpanel:advertising:icon_edit' icon.pk %}"
+                                   class="btn-secondary btn-sm text-xs">Bearbeiten</a>
+                                {% if icon.is_active %}
+                                <form method="post"
+                                      action="{% url 'adminpanel:advertising:icon_deactivate' icon.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="btn-sm text-xs px-2 py-1 rounded bg-yellow-900 hover:bg-yellow-800 text-yellow-300 transition-colors">
+                                        Deaktiv.
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'adminpanel:advertising:icon_delete' icon.pk %}"
+                                   class="btn-danger btn-sm text-xs">Löschen</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                            Keine Werbe-Icons vorhanden.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

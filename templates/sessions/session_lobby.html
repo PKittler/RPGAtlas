@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Lobby: {{ session.title }} – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{% url 'game_sessions:session_list' %}" class="btn-secondary btn-sm">← Übersicht</a>
+        <h1 class="text-2xl font-bold">{{ session.title }}</h1>
+        <span class="badge badge-blue">Wartet</span>
+    </div>
+
+    {% if is_gamemaster %}
+    {# Einladungslink #}
+    <div class="card mb-6">
+        <div class="card-body">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                Einladungslink
+            </h2>
+            <div class="flex items-center gap-2">
+                <input type="text" readonly value="{{ invite_url }}"
+                       id="invite-input"
+                       class="form-input text-xs flex-1 font-mono">
+                <button onclick="navigator.clipboard.writeText('{{ invite_url }}').then(function(){this.textContent='Kopiert!';}.bind(this))"
+                        class="btn-secondary btn-sm shrink-0">Kopieren</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Teilnehmerliste (HTMX-Polling) #}
+    <div id="lobby-participants-container"
+         hx-get="{% url 'game_sessions:lobby_participants' session.pk %}"
+         hx-trigger="every 3s"
+         hx-swap="innerHTML">
+        {% include 'sessions/partials/lobby_participants.html' %}
+    </div>
+
+    {% if is_gamemaster %}
+    {# Session starten #}
+    <div class="mt-6 flex gap-3">
+        <form method="post" action="{% url 'game_sessions:session_start' session.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary">Session starten</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="mt-6 text-sm text-gray-500 dark:text-gray-400">
+        Du bist bestätigt. Warte auf den Spielleiter.
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

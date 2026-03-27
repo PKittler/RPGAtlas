@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ quest.title }} – RPG Atlas{% endblock %}
+
+{% block extra_head %}
+<style>
+  .step-item { cursor: grab; }
+  .step-item.dragging { opacity: 0.4; }
+  .step-item.drag-over { border-color: #6366f1; background: #1e1b4b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            <a href="{% url 'quests:quest_list' quest.map_set.pk %}"
+               class="text-sm text-gray-500 hover:text-gray-300 transition-colors">
+                ← Quests von {{ quest.map_set.title }}
+            </a>
+            <h1 class="text-2xl font-bold mt-2">{{ quest.title }}</h1>
+            {% if quest.description %}
+            <p class="text-sm text-gray-400 mt-1">{{ quest.description }}</p>
+            {% endif %}
+        </div>
+        <div class="flex gap-2 shrink-0">
+            <a href="{% url 'quests:quest_edit' quest.pk %}" class="btn-secondary btn-sm">Bearbeiten</a>
+            <a href="{% url 'quests:quest_delete' quest.pk %}" class="btn-danger btn-sm">Löschen</a>
+        </div>
+    </div>
+
+    {# Quest-Schritte #}
+    <div class="card">
+        <div class="card-body">
+            <h2 class="font-semibold text-lg mb-4">Quest-Schritte</h2>
+
+            {% if steps %}
+            <ul id="steps-list" class="space-y-2 mb-6"
+                data-reorder-url="{% url 'quests:step_reorder' quest.pk %}">
+                {% for step in steps %}
+                <li class="step-item flex items-start gap-3 p-3 rounded-lg border border-gray-700 bg-gray-800"
+                    data-step-pk="{{ step.pk }}">
+                    <span class="text-gray-500 text-sm font-mono select-none pt-0.5 shrink-0 w-5 text-center">
+                        {{ step.order }}
+                    </span>
+                    <span class="flex-1 text-sm text-gray-200">{{ step.description }}</span>
+                    <form method="post" action="{% url 'quests:step_delete' step.pk %}"
+                          class="shrink-0"
+                          onsubmit="return confirm('Schritt löschen?')">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded">
+                            Löschen
+                        </button>
+                    </form>
+                    <span class="text-gray-600 cursor-grab select-none shrink-0 pt-0.5" title="Ziehen zum Sortieren">⠿</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-sm text-gray-500 mb-6">Noch keine Schritte. Füge den ersten hinzu.</p>
+            {% endif %}
+
+            {# Schritt hinzufügen #}
+            <form method="post" action="{% url 'quests:step_add' quest.pk %}" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Neuer Schritt</label>
+                    <textarea name="description" rows="2"
+                              class="form-input"
+                              placeholder="Beschreibung des nächsten Schritts…"></textarea>
+                    {% for e in step_form.description.errors %}
+                        <p class="form-error">{{ e }}</p>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-primary btn-sm">+ Schritt hinzufügen</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/quest_steps.js' %}"></script>
+{% endblock %}

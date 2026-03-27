@@ -1,0 +1,249 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+{% block title %}Werbe-Icon setzen – Admin-Panel{% endblock %}
+{% block nav_icons %}active{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+  #map-preview-container {
+    position: relative;
+    display: inline-block;
+    cursor: crosshair;
+    border: 2px solid #374151;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  #map-preview-img {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    user-select: none;
+  }
+  #map-preview-marker {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #f59e0b;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    display: none;
+  }
+</style>
+{% endblock %}
+
+{% block adminpanel_content %}
+<div class="max-w-2xl space-y-6">
+
+    <div>
+        <a href="{% url 'adminpanel:advertising:icon_list' %}"
+           class="text-sm text-gray-500 hover:text-gray-300 transition-colors">← Werbe-Icons</a>
+        <h1 class="text-2xl font-bold mt-2">Werbe-Icon setzen</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate id="icon-form">
+                {% csrf_token %}
+
+                {# Kampagne #}
+                <div class="mb-4">
+                    <label class="form-label">{{ form.campaign.label }}</label>
+                    <select name="campaign" class="form-input">
+                        <option value="">— Kampagne wählen —</option>
+                        {% for c in form.campaign.field.queryset %}
+                        <option value="{{ c.pk }}"
+                                {% if form.campaign.value|stringformat:"s" == c.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ c.title }} ({{ c.partner.name }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% for e in form.campaign.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                {# Karte + Position-Picker #}
+                <div class="mb-4">
+                    <label class="form-label">{{ form.map.label }}</label>
+                    <select name="map" id="map-select" class="form-input">
+                        <option value="">— Karte wählen —</option>
+                        {% for m in maps %}
+                        <option value="{{ m.pk }}"
+                                data-type="{{ m.map_set.map_type }}"
+                                data-image="{% if m.image %}{{ m.image.url }}{% endif %}"
+                                {% if form.map.value|stringformat:"s" == m.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ m.map_set.title }} › {{ m.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% for e in form.map.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                {# Positions-Vorschau #}
+                <div id="map-preview-area" class="mb-4 hidden">
+                    <p class="text-xs text-gray-400 mb-2">
+                        Klicke auf das Kartenbild, um die Position zu setzen, oder trage die Werte manuell ein.
+                    </p>
+                    <div id="map-preview-container">
+                        <img id="map-preview-img" src="" alt="Karten-Vorschau">
+                        <div id="map-preview-marker"></div>
+                    </div>
+                </div>
+
+                {# X/Y Positionen #}
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">{{ form.x_pos.label }}</label>
+                        <input type="number" name="x_pos" id="x-pos-input"
+                               value="{{ form.x_pos.value|default:'' }}"
+                               step="0.001" min="0" max="1"
+                               class="form-input" placeholder="0.500">
+                        {% for e in form.x_pos.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                    <div>
+                        <label class="form-label">{{ form.y_pos.label }}</label>
+                        <input type="number" name="y_pos" id="y-pos-input"
+                               value="{{ form.y_pos.value|default:'' }}"
+                               step="0.001" min="0" max="1"
+                               class="form-input" placeholder="0.500">
+                        {% for e in form.y_pos.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                </div>
+
+                {# Werbetext #}
+                <div class="mb-4">
+                    <label class="form-label">{{ form.ad_text.label }}</label>
+                    <textarea name="ad_text" rows="3"
+                              class="form-input"
+                              placeholder="Text, der im Popup angezeigt wird…">{{ form.ad_text.value|default:'' }}</textarea>
+                    {% for e in form.ad_text.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                {# Gutschein + Link #}
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">{{ form.coupon_code.label }}</label>
+                        <input type="text" name="coupon_code"
+                               value="{{ form.coupon_code.value|default:'' }}"
+                               class="form-input" placeholder="z.B. RPGSPECIAL20">
+                        {% for e in form.coupon_code.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                    <div>
+                        <label class="form-label">{{ form.max_clicks.label }}</label>
+                        <input type="number" name="max_clicks"
+                               value="{{ form.max_clicks.value|default:'' }}"
+                               class="form-input" min="1" placeholder="leer = unbegrenzt">
+                        {% for e in form.max_clicks.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">{{ form.link_url.label }}</label>
+                        <input type="url" name="link_url"
+                               value="{{ form.link_url.value|default:'' }}"
+                               class="form-input" placeholder="https://...">
+                        {% for e in form.link_url.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                    <div>
+                        <label class="form-label">{{ form.link_label.label }}</label>
+                        <input type="text" name="link_label"
+                               value="{{ form.link_label.value|default:'' }}"
+                               class="form-input" placeholder="z.B. Jetzt kaufen">
+                        {% for e in form.link_label.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_active"
+                               {% if form.is_active.value != False %}checked{% endif %}
+                               class="form-checkbox">
+                        <span class="text-sm text-gray-300">{{ form.is_active.label }}</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1">Icon setzen</button>
+                    <a href="{% url 'adminpanel:advertising:icon_list' %}" class="btn-secondary">Abbrechen</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    const mapSelect   = document.getElementById('map-select');
+    const previewArea = document.getElementById('map-preview-area');
+    const previewImg  = document.getElementById('map-preview-img');
+    const marker      = document.getElementById('map-preview-marker');
+    const xInput      = document.getElementById('x-pos-input');
+    const yInput      = document.getElementById('y-pos-input');
+
+    function updatePreview() {
+        const opt = mapSelect.options[mapSelect.selectedIndex];
+        if (!opt || !opt.value) {
+            previewArea.classList.add('hidden');
+            return;
+        }
+        const mapType = opt.dataset.type;
+        const imageUrl = opt.dataset.image;
+
+        if (mapType === 'image' && imageUrl) {
+            previewImg.src = imageUrl;
+            previewArea.classList.remove('hidden');
+            updateMarkerFromInputs();
+        } else {
+            previewArea.classList.add('hidden');
+        }
+    }
+
+    function updateMarkerFromInputs() {
+        const x = parseFloat(xInput.value);
+        const y = parseFloat(yInput.value);
+        if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+            const rect = previewImg.getBoundingClientRect();
+            const container = document.getElementById('map-preview-container');
+            marker.style.left = (x * previewImg.offsetWidth) + 'px';
+            marker.style.top  = (y * previewImg.offsetHeight) + 'px';
+            marker.style.display = 'block';
+        } else {
+            marker.style.display = 'none';
+        }
+    }
+
+    previewImg.addEventListener('load', function () {
+        updateMarkerFromInputs();
+    });
+
+    document.getElementById('map-preview-container').addEventListener('click', function (e) {
+        const rect = previewImg.getBoundingClientRect();
+        const containerRect = this.getBoundingClientRect();
+        const relX = (e.clientX - rect.left) / rect.width;
+        const relY = (e.clientY - rect.top) / rect.height;
+        const x = Math.max(0, Math.min(1, relX));
+        const y = Math.max(0, Math.min(1, relY));
+
+        xInput.value = x.toFixed(4);
+        yInput.value = y.toFixed(4);
+
+        marker.style.left = ((e.clientX - containerRect.left)) + 'px';
+        marker.style.top  = ((e.clientY - containerRect.top)) + 'px';
+        marker.style.display = 'block';
+    });
+
+    xInput.addEventListener('input', updateMarkerFromInputs);
+    yInput.addEventListener('input', updateMarkerFromInputs);
+    mapSelect.addEventListener('change', updatePreview);
+
+    updatePreview();
+}());
+</script>
+{% endblock %}

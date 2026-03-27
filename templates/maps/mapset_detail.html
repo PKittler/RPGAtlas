@@ -27,8 +27,9 @@
             </div>
         </div>
         {% if is_owner %}
-        <div class="flex gap-2 shrink-0">
+        <div class="flex gap-2 shrink-0 flex-wrap justify-end">
             <a href="{% url 'maps:map_add' mapset.pk %}" class="btn-primary btn-sm">+ Karte hinzufügen</a>
+            <a href="{% url 'quests:quest_list' mapset.pk %}" class="btn-secondary btn-sm">Quests verwalten</a>
             <a href="{% url 'maps:mapset_edit' mapset.pk %}" class="btn-secondary btn-sm">Bearbeiten</a>
             <a href="{% url 'maps:mapset_delete' mapset.pk %}" class="btn-danger btn-sm">Löschen</a>
         </div>

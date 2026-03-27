@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Warte auf Bestätigung – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-16 text-center">
+    <div class="card">
+        <div class="card-body py-10">
+            <div class="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <h1 class="text-xl font-bold mb-2">Warte auf Bestätigung</h1>
+            <p class="text-gray-400 mb-6">
+                Der Spielleiter muss deinen Beitritt zu
+                <span class="text-white font-medium">{{ session.title }}</span>
+                bestätigen.
+            </p>
+
+            {# HTMX-Polling: alle 3s Status prüfen #}
+            <div id="join-status"
+                 hx-get="{% url 'game_sessions:join_status_check' session.pk %}"
+                 hx-trigger="every 3s"
+                 hx-swap="innerHTML">
+                {% include 'sessions/partials/join_status_check.html' %}
+            </div>
+
+            <div class="mt-8">
+                <a href="{% url 'game_sessions:session_list' %}" class="btn-secondary btn-sm">
+                    Abbrechen
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

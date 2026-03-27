@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'quests',
     'inventory',
     'advertising',
+    'adminpanel',
 ]
 
 MIDDLEWARE = [

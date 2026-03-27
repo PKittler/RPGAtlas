@@ -1,0 +1,31 @@
+{# HTMX-Partial: Item-Transfer Formular #}
+{% if error %}
+<div class="p-2 rounded bg-red-900/40 text-xs text-red-300 mb-2">{{ error }}</div>
+{% endif %}
+
+{% if nearby_characters %}
+<form hx-post="{% url 'inventory:item_transfer' item.pk %}"
+      hx-target="#item-transfer-area-{{ item.pk }}"
+      hx-swap="innerHTML"
+      class="flex items-center gap-2 mt-1 px-3 pb-2">
+    {% csrf_token %}
+    <select name="target_character" class="form-input text-xs py-0.5 flex-1">
+        {% for char in nearby_characters %}
+        <option value="{{ char.pk }}">{{ char.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit"
+            class="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 text-blue-200 transition-colors shrink-0">
+        Übergeben
+    </button>
+    <button type="button"
+            onclick="document.getElementById('item-transfer-area-{{ item.pk }}').innerHTML=''"
+            class="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors shrink-0">
+        ✕
+    </button>
+</form>
+{% else %}
+<div class="px-3 pb-2">
+    <p class="text-xs text-gray-500">Keine Figuren in Reichweite (max. 2%).</p>
+</div>
+{% endif %}

@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ session.title }} – RPG Atlas{% endblock %}
+
+{% block extra_head %}
+<style>
+  main { padding: 0 !important; max-width: 100% !important; overflow: hidden; }
+
+  #session-container {
+    display: flex;
+    height: calc(100vh - 3.5rem);
+    overflow: hidden;
+  }
+  #session-map {
+    flex: 1;
+    min-width: 0;
+  }
+  #session-sidebar {
+    width: 280px;
+    background: #111827;
+    border-left: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .map-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .map-modal-box {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 420px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── JSON-Daten für JS ────────────────────────────────────────────────── #}
+{{ session_data_json|json_script:"session-data" }}
+{{ map_data_json|json_script:"map-data" }}
+{{ gates_json|json_script:"gates-data" }}
+{{ elements_json|json_script:"elements-data" }}
+{{ characters_json|json_script:"characters-data" }}
+
+<div id="session-container">
+
+    {# ── Karte ────────────────────────────────────────────────────────── #}
+    <div style="position:relative; flex:1; min-width:0;">
+        <div id="session-map"></div>
+
+        {# Toolbar #}
+        <div style="position:absolute;top:12px;left:12px;z-index:400;display:flex;flex-direction:column;gap:8px;pointer-events:none;">
+            <div style="pointer-events:auto;">
+                <span class="badge badge-blue shadow-lg text-xs px-3 py-1.5">
+                    {{ session.title }} &middot; {{ map.title }}
+                </span>
+            </div>
+            <div style="pointer-events:auto;" class="flex flex-col gap-1">
+                <button id="btn-toggle-line"
+                        class="btn-secondary btn-sm shadow-lg">
+                    Linie ausblenden
+                </button>
+            </div>
+        </div>
+
+        {# WS-Status #}
+        <div style="position:absolute;bottom:12px;left:12px;z-index:400;">
+            <span id="ws-status" class="text-xs text-gray-400">Verbinde…</span>
+        </div>
+
+        {# Stale-Warnung #}
+        {% if is_stale %}
+        <div style="position:absolute;top:12px;right:12px;z-index:400;pointer-events:auto;">
+            <form method="post" action="{% url 'game_sessions:session_end' session.pk %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn-danger btn-sm shadow-lg"
+                        onclick="return confirm('Session wirklich beenden?')">
+                    Session beenden (30 Tage inaktiv)
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── Sidebar ──────────────────────────────────────────────────────── #}
+    <div id="session-sidebar" x-data="{ tab: 'figures' }">
+
+        {# Sidebar-Header #}
+        <div class="px-3 pt-3 pb-0 border-b border-gray-700">
+            <div class="flex gap-1 mb-0">
+                <button @click="tab='figures'"
+                        :class="tab==='figures' ? 'text-primary-400 border-b-2 border-primary-400' : 'text-gray-400'"
+                        class="px-3 py-2 text-xs font-medium transition-colors">
+                    Figuren
+                </button>
+                <button @click="tab='quests'; htmx.trigger(document.getElementById('quest-tab-loader'), 'questTabVisible')"
+                        :class="tab==='quests' ? 'text-primary-400 border-b-2 border-primary-400' : 'text-gray-400'"
+                        class="px-3 py-2 text-xs font-medium transition-colors">
+                    Quests
+                </button>
+                <button @click="tab='inventory'; htmx.trigger(document.getElementById('inv-tab-loader'), 'invTabVisible')"
+                        :class="tab==='inventory' ? 'text-primary-400 border-b-2 border-primary-400' : 'text-gray-400'"
+                        class="px-3 py-2 text-xs font-medium transition-colors">
+                    Inventar
+                </button>
+            </div>
+        </div>
+
+        {# Tab: Figuren #}
+        <div x-show="tab==='figures'" class="flex-1 overflow-y-auto p-3 space-y-2">
+            {% for char_data in characters %}
+            <div id="sidebar-char-{{ char_data.id }}"
+                 class="rounded-lg p-2 bg-gray-800 border border-gray-700 text-sm">
+                <div class="flex items-center gap-2">
+                    {% if char_data.avatar_url %}
+                    <img src="{{ char_data.avatar_url }}" class="w-8 h-8 rounded-full object-cover shrink-0">
+                    {% else %}
+                    <div class="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white"
+                         style="background-color: {{ char_data.color }};">
+                        {{ char_data.name|first|upper }}
+                    </div>
+                    {% endif %}
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate text-xs">{{ char_data.name }}</p>
+                        <p id="sidebar-char-map-{{ char_data.id }}"
+                           class="text-xs text-gray-500 truncate">
+                            {% if char_data.current_map_title %}{{ char_data.current_map_title }}{% else %}—{% endif %}
+                        </p>
+                    </div>
+                    {% if char_data.is_eliminated %}
+                    <span class="text-xs text-gray-500 shrink-0">Ausgeschieden</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex gap-1 mt-2">
+                    {% if char_data.on_current_map %}
+                    <button onclick="window.jumpToCharacter({{ char_data.id }})"
+                            class="btn-secondary btn-sm text-xs flex-1">
+                        Zur Figur
+                    </button>
+                    <button onclick="window.showCharacterPath({{ char_data.id }}, '{{ char_data.color }}')"
+                            class="btn-secondary btn-sm text-xs">
+                        Pfad
+                    </button>
+                    {% endif %}
+                    {% if is_gamemaster and not char_data.is_eliminated %}
+                    <form method="post"
+                          action="{% url 'game_sessions:participant_eliminate' char_data.participant_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger btn-sm text-xs"
+                                onclick="return confirm('Figur ausscheiden lassen?')">
+                            Ausscheiden
+                        </button>
+                    </form>
+                    <form method="post"
+                          action="{% url 'game_sessions:participant_remove' char_data.participant_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger btn-sm text-xs"
+                                onclick="return confirm('Figur entfernen?')">
+                            Entfernen
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-xs text-gray-500">Keine Figuren.</p>
+            {% endfor %}
+
+            {% if is_gamemaster %}
+            <div class="pt-2 border-t border-gray-700 space-y-2">
+                <p class="text-xs text-gray-500 font-medium">Karte wechseln</p>
+                <form method="post" action="{% url 'game_sessions:session_change_map' session.pk %}"
+                      class="flex gap-1">
+                    {% csrf_token %}
+                    <select name="map_id" class="form-input text-xs flex-1 py-1">
+                        {% for m in session.active_map.map_set.maps.all %}
+                        <option value="{{ m.pk }}" {% if m.pk == session.active_map_id %}selected{% endif %}>
+                            {{ m.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-secondary btn-sm text-xs">Wechseln</button>
+                </form>
+
+                <form method="post" action="{% url 'game_sessions:session_end' session.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger btn-sm text-xs w-full"
+                            onclick="return confirm('Session wirklich beenden?')">
+                        Session beenden
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        {# Tab: Quests #}
+        <div x-show="tab==='quests'" class="flex-1 overflow-y-auto p-3">
+            <div id="quest-tab-loader"
+                 hx-get="{% url 'game_sessions:quest_sidebar' session.pk %}"
+                 hx-trigger="questTabVisible, questUpdated from:body"
+                 hx-swap="innerHTML">
+                <p class="text-xs text-gray-500">Klicke auf den Tab, um Quests zu laden.</p>
+            </div>
+        </div>
+
+        {# Tab: Inventar #}
+        <div x-show="tab==='inventory'" class="flex-1 overflow-y-auto p-3">
+            <div id="inv-tab-loader"
+                 hx-get="{% url 'game_sessions:inventory_sidebar' session.pk %}"
+                 hx-trigger="invTabVisible, inventoryUpdated from:body"
+                 hx-swap="innerHTML">
+                <p class="text-xs text-gray-500">Klicke auf den Tab, um das Inventar zu laden.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{# ── Element-Popup-Modal ───────────────────────────────────────────────── #}
+<div id="element-popup-modal" class="map-modal-backdrop" hidden>
+    <div class="map-modal-box">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Element</h2>
+            <button id="btn-close-element-popup-modal"
+                    class="text-gray-400 hover:text-white transition-colors text-2xl leading-none"
+                    aria-label="Schließen">✕</button>
+        </div>
+        <div id="element-popup-modal-content"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  window.SESSION_ID           = {{ session.pk }};
+  window.IS_GAMEMASTER        = {{ is_gamemaster|yesno:"true,false" }};
+  window.CURRENT_MAP_ID       = {{ session.active_map.pk }};
+  window.CSRF_TOKEN           = "{{ csrf_token }}";
+  window.CHARACTER_PATH_BASE  = "{% url 'game_sessions:character_path' session.pk 0 %}".replace('/0/path/', '/');
+</script>
+
+<script src="{% static 'vendor/js/leaflet.js' %}"></script>
+<script>L.Icon.Default.imagePath = "{% static 'vendor/leaflet/images/' %}";</script>
+
+<script src="{% static 'js/gate_icons.js' %}"></script>
+<script src="{% static 'js/element_icons.js' %}"></script>
+<script src="{% static 'js/session_view.js' %}"></script>
+{% endblock %}

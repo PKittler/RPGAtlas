@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Session beitreten – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-2">Session beitreten</h1>
+    <p class="text-gray-400 mb-6">{{ session.title }}</p>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label">{{ pw_form.password_plain.label }}</label>
+                    <input type="password" name="pw-password_plain" class="form-input" autofocus>
+                    {% for e in pw_form.password_plain.errors %}
+                    <p class="form-error">{{ e }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-6">
+                    <label class="form-label">{{ char_form.character.label }}</label>
+                    <select name="ch-character" class="form-input">
+                        <option value="">— Figur auswählen —</option>
+                        {% for char in char_form.character.field.queryset %}
+                        <option value="{{ char.pk }}">{{ char.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for e in char_form.character.errors %}
+                    <p class="form-error">{{ e }}</p>
+                    {% endfor %}
+                    {% if not char_form.character.field.queryset %}
+                    <p class="text-xs text-amber-400 mt-1">
+                        Keine verfügbaren Figuren. Erstelle zuerst eine Figur oder verlasse eine aktive Session.
+                    </p>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-primary w-full">Beitreten</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}{{ target_user.username }} bearbeiten – Admin-Panel{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block adminpanel_content %}
+<div class="max-w-lg space-y-6">
+
+    <div>
+        <a href="{% url 'adminpanel:user_list' %}"
+           class="text-sm text-gray-500 hover:text-gray-300 transition-colors">← Benutzer</a>
+        <h1 class="text-2xl font-bold mt-2">{{ target_user.username }} bearbeiten</h1>
+        <p class="text-xs text-gray-500 mt-1">ID {{ target_user.pk }} · erstellt {{ target_user.created_at|date:"d.m.Y" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.username.label }}</label>
+                    <input type="text" name="username" value="{{ form.username.value|default:'' }}"
+                           class="form-input">
+                    {% for e in form.username.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.email.label }}</label>
+                    <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                           class="form-input">
+                    {% for e in form.email.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.role.label }}</label>
+                    <select name="role" class="form-input">
+                        {% for val, label in form.role.field.choices %}
+                        <option value="{{ val }}"
+                                {% if form.role.value == val %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% for e in form.role.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-4 space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_banned"
+                               {% if form.is_banned.value %}checked{% endif %}
+                               class="form-checkbox">
+                        <span class="text-sm text-gray-300">{{ form.is_banned.label }}</span>
+                    </label>
+                    {% for e in form.is_banned.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="hide_ads"
+                               {% if form.hide_ads.value %}checked{% endif %}
+                               class="form-checkbox">
+                        <span class="text-sm text-gray-300">{{ form.hide_ads.label }}</span>
+                    </label>
+                    {% for e in form.hide_ads.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="btn-primary flex-1">Speichern</button>
+                    <a href="{% url 'adminpanel:user_list' %}" class="btn-secondary">Abbrechen</a>
+                    {% if target_user != request.user %}
+                    <a href="{% url 'adminpanel:user_delete' target_user.pk %}"
+                       class="btn-danger btn-sm">Löschen</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

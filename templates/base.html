@@ -45,15 +45,25 @@
                 <span class="hidden sm:inline text-gray-500 dark:text-gray-400">{{ user.username }}</span>
 
                 {% if user.is_admin %}
-                    <a href="{% url 'accounts:admin_user_list' %}"
-                       class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400">
-                        Admin
+                    <a href="{% url 'adminpanel:dashboard' %}"
+                       class="text-yellow-600 hover:text-yellow-500 dark:text-yellow-400 dark:hover:text-yellow-300 font-medium">
+                        Admin-Panel
                     </a>
                 {% endif %}
 
                 <a href="{% url 'maps:mapset_list' %}"
                    class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400">
                     Karten
+                </a>
+
+                <a href="{% url 'characters:character_list' %}"
+                   class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400">
+                    Figuren
+                </a>
+
+                <a href="{% url 'game_sessions:session_list' %}"
+                   class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400">
+                    Sessions
                 </a>
 
                 <a href="{% url 'accounts:profile' %}"

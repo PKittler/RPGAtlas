@@ -1,0 +1,76 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}{{ campaign.title }} bearbeiten – Admin-Panel{% endblock %}
+{% block nav_campaigns %}active{% endblock %}
+
+{% block adminpanel_content %}
+<div class="max-w-lg space-y-6">
+
+    <div>
+        <a href="{% url 'adminpanel:advertising:campaign_list' %}"
+           class="text-sm text-gray-500 hover:text-gray-300 transition-colors">← Kampagnen</a>
+        <h1 class="text-2xl font-bold mt-2">{{ campaign.title }} bearbeiten</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.title.label }}</label>
+                    <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+                           class="form-input">
+                    {% for e in form.title.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">{{ form.partner.label }}</label>
+                    <select name="partner" class="form-input">
+                        {% for p in form.partner.field.queryset %}
+                        <option value="{{ p.pk }}"
+                                {% if form.partner.value|stringformat:"s" == p.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ p.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% for e in form.partner.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">{{ form.start_date.label }}</label>
+                        <input type="date" name="start_date"
+                               value="{{ form.start_date.value|date:'Y-m-d'|default:'' }}"
+                               class="form-input">
+                        {% for e in form.start_date.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                    <div>
+                        <label class="form-label">{{ form.end_date.label }}</label>
+                        <input type="date" name="end_date"
+                               value="{{ form.end_date.value|date:'Y-m-d'|default:'' }}"
+                               class="form-input">
+                        {% for e in form.end_date.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_active"
+                               {% if form.is_active.value %}checked{% endif %}
+                               class="form-checkbox">
+                        <span class="text-sm text-gray-300">{{ form.is_active.label }}</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1">Speichern</button>
+                    <a href="{% url 'adminpanel:advertising:campaign_list' %}" class="btn-secondary">Abbrechen</a>
+                    <a href="{% url 'adminpanel:advertising:campaign_delete' campaign.pk %}"
+                       class="btn-danger btn-sm">Löschen</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -96,16 +96,27 @@ class GateForm(forms.ModelForm):
 class NPCForm(forms.ModelForm):
     class Meta:
         model = NPC
-        fields = ['image', 'dialogue_text', 'button_type']
+        fields = ['image', 'dialogue_text', 'button_type', 'quest']
         labels = {
             'image': 'Bild (optional)',
             'dialogue_text': 'Dialogtext',
             'button_type': 'Button-Typ',
+            'quest': 'Quest bei Annahme (optional)',
         }
         widgets = {
             'dialogue_text': forms.Textarea(attrs={'rows': 4}),
             'button_type': forms.RadioSelect(),
         }
+
+    def __init__(self, map_set=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from quests.models import Quest
+        if map_set:
+            self.fields['quest'].queryset = Quest.objects.filter(map_set=map_set)
+        else:
+            self.fields['quest'].queryset = Quest.objects.none()
+        self.fields['quest'].required = False
+        self.fields['quest'].empty_label = '— Keine Quest —'
 
     def clean_image(self):
         image = self.cleaned_data.get('image')

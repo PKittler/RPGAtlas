@@ -1,0 +1,117 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Admin-Panel – RPG Atlas{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block adminpanel_content %}
+<div class="space-y-8">
+
+    <div>
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <p class="text-sm text-gray-400 mt-1">Übersicht über RPG Atlas</p>
+    </div>
+
+    {# ── Kennzahlen ─────────────────────────────────────────────────── #}
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <div class="card">
+            <div class="card-body">
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Benutzer gesamt</p>
+                <p class="text-3xl font-bold text-white">{{ total_users }}</p>
+                <p class="text-xs text-gray-400 mt-2">
+                    <span class="text-green-400">{{ active_users }} aktiv</span>
+                    &nbsp;·&nbsp;
+                    <span class="text-red-400">{{ banned_users }} gesperrt</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Karten-Sets</p>
+                <p class="text-3xl font-bold text-white">{{ total_mapsets }}</p>
+                <p class="text-xs text-gray-400 mt-2">Alle Benutzer</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Laufende Sessions</p>
+                <p class="text-3xl font-bold
+                    {% if running_sessions > 0 %}text-green-400{% else %}text-white{% endif %}">
+                    {{ running_sessions }}
+                </p>
+                <p class="text-xs text-gray-400 mt-2">Status: running</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Aktive Kampagnen</p>
+                <p class="text-3xl font-bold
+                    {% if active_campaigns > 0 %}text-yellow-400{% else %}text-white{% endif %}">
+                    {{ active_campaigns }}
+                </p>
+                <p class="text-xs text-gray-400 mt-2">Im Zeitraum &amp; aktiv</p>
+            </div>
+        </div>
+
+    </div>
+
+    {# ── Schnell-Links ──────────────────────────────────────────────── #}
+    <div>
+        <h2 class="text-lg font-semibold mb-4">Schnell-Links</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+
+            <a href="{% url 'adminpanel:user_list' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">👤</div>
+                <p class="text-sm font-medium">Benutzer verwalten</p>
+            </a>
+
+            <a href="{% url 'adminpanel:user_create' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">➕</div>
+                <p class="text-sm font-medium">Benutzer erstellen</p>
+            </a>
+
+            <a href="{% url 'adminpanel:mapset_list' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">🗺</div>
+                <p class="text-sm font-medium">Karten-Sets</p>
+            </a>
+
+            <a href="{% url 'adminpanel:advertising:partner_list' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">🏢</div>
+                <p class="text-sm font-medium">Werbepartner</p>
+            </a>
+
+            <a href="{% url 'adminpanel:advertising:campaign_list' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">📢</div>
+                <p class="text-sm font-medium">Kampagnen</p>
+            </a>
+
+            <a href="{% url 'adminpanel:advertising:campaign_create' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">🆕</div>
+                <p class="text-sm font-medium">Kampagne erstellen</p>
+            </a>
+
+            <a href="{% url 'adminpanel:advertising:icon_list' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">📍</div>
+                <p class="text-sm font-medium">Werbe-Icons</p>
+            </a>
+
+            <a href="{% url 'adminpanel:advertising:icon_create' %}"
+               class="card hover:shadow-md transition-shadow text-center p-4 block">
+                <div class="text-2xl mb-2">📌</div>
+                <p class="text-sm font-medium">Werbe-Icon setzen</p>
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

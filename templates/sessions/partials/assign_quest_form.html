@@ -1,0 +1,49 @@
+{# HTMX-Partial: Quest-Zuweisung Formular #}
+<form hx-post="{% url 'game_sessions:assign_quest' session.pk %}"
+      hx-target="#quest-assign-area"
+      hx-swap="innerHTML"
+      class="space-y-3 mt-2 p-3 rounded-lg border border-gray-600 bg-gray-800">
+
+    {% csrf_token %}
+
+    {% if quests %}
+    <div>
+        <label class="form-label text-xs">Quest</label>
+        <select name="quest_id" class="form-input text-xs py-1">
+            {% for quest in quests %}
+            <option value="{{ quest.pk }}">{{ quest.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div>
+        <label class="form-label text-xs">Figuren</label>
+        <div class="space-y-1 max-h-32 overflow-y-auto">
+            {% for p in participants %}
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="character_ids" value="{{ p.character.pk }}"
+                       class="form-checkbox" checked>
+                <span class="text-xs text-gray-300">{{ p.character.name }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="flex gap-2">
+        <button type="submit" class="btn-primary btn-sm text-xs flex-1">Zuweisen</button>
+        <button type="button"
+                onclick="document.getElementById('quest-assign-area').innerHTML=''"
+                class="btn-secondary btn-sm text-xs">
+            Abbrechen
+        </button>
+    </div>
+    {% else %}
+    <p class="text-xs text-gray-500">Keine Quests für dieses Karten-Set vorhanden.</p>
+    <button type="button"
+            onclick="document.getElementById('quest-assign-area').innerHTML=''"
+            class="btn-secondary btn-sm text-xs w-full mt-1">
+        Schließen
+    </button>
+    {% endif %}
+
+</form>

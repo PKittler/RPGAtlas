@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ session.title }} – RPG Atlas{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-16 text-center">
+    <div class="card">
+        <div class="card-body py-10">
+            <h1 class="text-xl font-bold mb-2">{{ session.title }}</h1>
+            <p class="text-gray-400 mb-6">Kein Karten-Set ausgewählt.</p>
+            {% if is_gamemaster %}
+            <p class="text-sm text-gray-500 mb-4">Wähle eine Karte aus um die Session zu starten.</p>
+            <form method="post" action="{% url 'game_sessions:session_change_map' session.pk %}">
+                {% csrf_token %}
+                {# Die verfügbaren Maps werden hier nicht direkt angezeigt – im Echtbetrieb über ein Select-Form #}
+                <a href="{% url 'maps:mapset_list' %}" class="btn-secondary">Zu den Karten-Sets</a>
+            </form>
+            {% endif %}
+            {% if is_stale %}
+            <form method="post" action="{% url 'game_sessions:session_end' session.pk %}" class="mt-4">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger btn-sm">Session beenden (inaktiv)</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
